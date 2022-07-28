@@ -1,0 +1,528 @@
+@import url('https://fonts.googleapis.com/css?family=DM+Sans:400,700&display=swap');
+
+html {
+	--black: 0;
+	--white: 255;
+	--theme: var(--black);
+	--theme-invert: var(--white);
+	
+	--base-full: rgba(var(--theme),var(--theme),var(--theme),1);
+	--base-80: rgba(var(--theme),var(--theme),var(--theme),0.8);
+	--base-60: rgba(var(--theme),var(--theme),var(--theme),0.6);
+	--base-40: rgba(var(--theme),var(--theme),var(--theme),0.4);
+	--base-20: rgba(var(--theme),var(--theme),var(--theme),0.2);
+	--base-10: rgba(var(--theme),var(--theme),var(--theme),0.1);
+	--base-5: rgba(var(--theme),var(--theme),var(--theme),0.05);
+	
+	--invert-full: rgba(var(--theme-invert),var(--theme-invert),var(--theme-invert),1);
+	--invert-80: rgba(var(--theme-invert),var(--theme-invert),var(--theme-invert),0.8);
+	--invert-60: rgba(var(--theme-invert),var(--theme-invert),var(--theme-invert),0.6);
+	--invert-40: rgba(var(--theme-invert),var(--theme-invert),var(--theme-invert),0.4);
+	--invert-20: rgba(var(--theme-invert),var(--theme-invert),var(--theme-invert),0.2);
+	--invert-10: rgba(var(--theme-invert),var(--theme-invert),var(--theme-invert),0.1);
+	--invert-5: rgba(var(--theme-invert),var(--theme-invert),var(--theme-invert),0.05);
+	
+	--red: #EE3F46;
+	--blue: #00A0F5;
+	--green: #27B768;
+	
+	--first: #F5CD75;
+	--second: var(--base-60);
+	--third: #C6906B;
+	
+	&.theme--dark {
+		--theme: var(--white);
+		--theme-invert: var(--black);
+	}
+}
+
+$font-family: 'DM Sans';
+$spacing-unit: 0.8rem;
+$wrapper-width: 500px;
+$base-font-size: 1.6rem;
+
+$states: (
+	primary: var(--base-full),
+	danger: var(--red),
+	success: var(--green),
+	info: var(--blue),
+	secondary: var(--base-60),
+	invert: var(--invert-full)
+);
+
+$places: (
+	first: var(--first),
+	second: var(--second),
+	third: var(--third)
+);
+
+$type-sizes: (
+	h1: 4.9rem,
+	h2: 3.9rem,
+	h3: 3.1rem,
+	h4: 2.5rem,
+	h5: 2.1rem,
+	h6: $base-font-size,
+	p: $base-font-size,
+	small: 1.2rem
+);
+
+@mixin transition($time: 200ms) {
+	transition: all $time ease-out 0s;
+}
+
+// Base
+
+html {
+	box-sizing: border-box;
+	font-size: 62.5%;
+}
+
+*, *:before, *:after {
+	box-sizing: inherit;
+}
+
+html, body {
+	width: 100%;
+	height: 100%;
+}
+
+body {
+	font-size: 1.6rem;
+	font-family: $font-family, system-ui;
+	background: var(--invert-full);
+	color: var(--base-full);
+	@include transition(100ms);
+}
+
+input, select, button, textarea {
+	font-family: inherit;
+	color: inherit;
+	background: transparent;
+	&:focus, &:active {
+		outline: 0;
+	}
+}
+
+// Typography
+$headers: (h1,h2,h3,h4,h5,h6);
+
+@each $header in $headers {
+	#{$header} {
+		font-size: map-get($type-sizes, #{$header});
+	}
+}
+
+h1,h2,h3,h4,h5,h6 {
+	margin-top: 0;
+	margin-bottom: $spacing-unit*2;
+}
+
+small {
+	font-size: 1.3rem;
+}
+
+p {
+	line-height: 1.5;
+}
+
+// Layout
+
+.l-wrapper {
+	width: 100%;
+	max-width: $wrapper-width;
+	margin: auto;
+	padding: $spacing-unit*4 $spacing-unit;
+}
+
+.l-header {
+	width: 100%;
+	max-width: $wrapper-width;
+	margin: auto;
+	padding: $spacing-unit*3 $spacing-unit $spacing-unit*2;
+	position: relative;
+}
+
+.l-footer {
+	text-align: center;
+	padding-top: $spacing-unit*2;
+}
+
+// Drawer
+
+.c-swipe-zone {
+	position: fixed;
+	bottom: 0;
+	height: 100%;
+	left: 0;
+	right: 0;
+	transform: translateY(-100px);
+	background: transparent;
+}
+
+.c-overlay {
+	position: fixed;
+	top: 0;
+	bottom: 0;
+	right: 0;
+	left: 0;
+	background: var(--base-40);
+	z-index: 50;
+	cursor: pointer;
+	@include transition;
+}
+
+$drawer-height: 300px;
+
+.c-drawer {
+	width: 100%;
+	height: $drawer-height;
+	max-width: $wrapper-width;
+	margin: auto;
+	padding: 0 $spacing-unit*3 $spacing-unit*5;
+	background: var(--base-full);
+	color: var(--invert-full);
+	position: fixed;
+	z-index: 100;
+	left: 50%;
+	bottom: 0;
+	border-top-left-radius: $spacing-unit;
+	border-top-right-radius: $spacing-unit;
+	animation: drawerClose 300ms ease-in 0s forwards;
+	&--open {
+		animation: drawerOpen 300ms ease-in 0s forwards;
+		.c-drawer__handle {
+			&:after {
+				content: 'CLOSE';
+				height: auto;
+				font-size: 1.2rem;
+				background: transparent;
+				color: var(--invert-60);
+				text-align: center;
+			}
+		}
+	}
+	&__handle {
+		height: $spacing-unit*3;
+		margin-bottom: $spacing-unit*2;
+		width: 100%;
+		position: relative;
+		cursor: pointer;
+		&:after {
+			content: '';
+			width: $spacing-unit*7;
+			height: $spacing-unit/2;
+			background: var(--invert-40);
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%,-50%);
+			border-radius: 999px;
+		}
+	}
+}
+
+// Table
+
+.c-table {
+	width: 100%;
+	border-spacing: 0;
+	&__row {
+		@include transition;
+		&:nth-of-type(even) {
+			.c-table__cell {
+				background: var(--base-5);
+			}
+		}
+	}
+	&__head-cell {
+		text-align: left;
+		padding: $spacing-unit;
+		font-size: 1.3rem;
+		border-bottom: 1px solid var(--base-40);
+		color: var(--base-60);
+	}
+	&__cell {
+		padding: $spacing-unit;
+	}
+} 
+
+// Place avatar
+
+.c-place {
+	$size: $spacing-unit*4;
+	display: inline-flex;
+	border-radius: 50%;
+	width: $size;
+	height: $size;
+	background: var(--base-20);
+	color: var(--invert-full);
+	align-items: center;
+	justify-content: center;
+	font-size: 1.4rem;
+	position: relative;
+	border: 2px solid var(--base-20);
+	&:before {
+			content: '';
+			position: absolute;
+			top: 0;
+			bottom: 0;
+			left: 0;
+			right: 0;
+			opacity: 0.15;
+			border-radius: 50%;
+		}
+}
+
+@each $key,$val in $places {
+	.c-place--#{$key} {
+		border-color: $val;
+		color: $val;
+		background: transparent;
+		&:before {
+			background: $val;
+		}
+	}
+}
+
+// Winner
+
+.c-winner {
+	padding: $spacing-unit*2;
+	margin-bottom: $spacing-unit*4;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	border: 1px solid map-get($places, first);
+	border-radius: $spacing-unit;
+	//box-shadow: 0px 2px 4px rgba(black, 0.07);
+	position: relative;
+	&:before {
+		content: '';
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		opacity: 0.08;
+		background: map-get($places, first);
+	}
+	&__image {
+		$size: $spacing-unit*6;
+		width: $size;
+		height: $size;
+		color: map-get($places, first);
+	}
+	&__content {
+		width: 100%;
+		padding-left: $spacing-unit*2;
+	}
+	&__badge {
+		text-transform: uppercase;
+		color: map-get($places, first);
+		font-weight: 700;
+		letter-spacing: .05em;
+	}
+	&__info {
+		display: flex;
+	}
+	&__title {
+		margin-top: $spacing-unit;
+		margin-bottom: $spacing-unit;
+	}
+	&__info-item {
+		&:not(:last-of-type) {
+			margin-right: $spacing-unit*2;
+		}
+	}
+}
+
+// Toggle
+
+.c-toggle {
+	height: $spacing-unit*3;
+	cursor: pointer;
+	display: inline-flex;
+	align-items: center;
+	justify-content: space-between;
+	width: 80px;
+	position: relative;
+	border: 1px solid var(--invert-20);
+	border-radius: $spacing-unit/2;
+	margin-bottom: $spacing-unit*2;
+	padding: 0 $spacing-unit/2;
+	flex-direction: row;
+	transition: all 100ms ease-out 0s;
+	&:before {
+		content: 'LIGHT';
+		font-size: map-get($type-sizes, small);
+		position: absolute;
+		top: 50%;
+		right: $spacing-unit/2;
+		transform: translateY(-50%);
+		color: var(--invert-60);
+		opacity: 0;
+		animation: fadeIn 200ms ease-out forwards;
+	}
+	&--active {
+		flex-direction: row-reverse;
+		animation: fadeIn 200ms ease-out forwards;
+		&:before {
+			content: 'DARK';
+			right: auto;
+			left: $spacing-unit/2;
+		}
+	}
+	&__handle {
+		height: $spacing-unit*2;
+		width: $spacing-unit*3;
+		background: var(--invert-40);
+		display: inline-block;
+		border-radius: $spacing-unit/3;
+	}
+}
+
+// Text Fields, selects
+
+.c-field {
+	&__input {
+		display: block;
+		width: 100%;
+		margin-top: $spacing-unit/2;
+		padding: $spacing-unit*2;
+		height: $spacing-unit*7;
+	}
+	&__label {
+		font-size: 1.3rem;
+	}
+}
+
+// Empty State
+
+.c-empty-state {
+	text-align: center;
+	width: 100%;
+	padding: $spacing-unit*5 $spacing-unit*2;
+	background: var(--base-5);
+	color: var(--base-40);
+	@include transition;
+	&__icon {
+		animation: loader 2s infinite linear;
+	}
+}
+
+// Title Container
+
+.c-headline {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding-bottom: $spacing-unit*2;
+	@media screen and (max-width: 768px) {
+		flex-direction: column;
+		text-align: center;
+	}
+	&__title {
+		margin-bottom: 0;
+		@media screen and (max-width: 768px) {
+			margin-bottom: $spacing-unit*2;
+		}
+	}
+}
+
+// Chips
+
+.c-chip {
+	font-size: map-get($type-sizes, 'small');
+	padding: $spacing-unit/2 $spacing-unit;
+	border-radius: 999px;
+	background: var(--base-20);
+	display: inline-block;
+	font-weight: 400;
+	color: rgba(white, 1);
+	border: 1px solid var(--base-20);
+	position: relative;
+	&:after {
+		content: '';
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		background: var(--base-20);
+		opacity: 0.12;
+		border-radius: 999px;
+	}
+}
+
+@each $key,$val in $states {
+	.c-chip--#{$key} {
+		color: $val;
+		border-color: $val;
+		background: transparent;
+		&:after {
+			background: $val;
+		}
+	}
+}
+
+// Utilities
+
+$alignments: (left, right, center);
+
+@each $align in $alignments {
+	.u-text--#{$align} {
+		text-align: $align !important;
+	}
+}
+
+@each $key,$val in $states {
+	.u-text--#{$key} {
+		color: $val !important;
+	}
+	.u-bg--#{$key} {
+		color: $val !important;
+	}
+}
+
+@keyframes loader {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(359deg)
+	}
+}
+
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+@keyframes drawerClose {
+	0% {
+		transform: translate(-50%,24px);
+	}
+	40% {
+		transform: translate(-50%, 0px);
+	}
+	100% {
+		transform: translate(-50%, $drawer-height - 24px);
+	}
+}
+
+@keyframes drawerOpen {
+	0% {
+		transform: translate(-50%, $drawer-height - 24px);
+	}
+	40% {
+		transform: translate(-50%, $drawer-height);
+	}
+	100% {
+		transform: translate(-50%, 24px);
+	}
+}
