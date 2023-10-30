@@ -1,12 +1,12 @@
 Formula 1 Driver Standings
 
-A Pen created on CodePen.io. Original URL: [https://codepen.io/rembertdesigns/pen/jOzawqv](https://codepen.io/rembertdesigns/pen/jOzawqv).
+A Pen was created on CodePen.io. Original URL: [https://codepen.io/rembertdesigns/pen/jOzawqv](https://codepen.io/rembertdesigns/pen/jOzawqv).
 
 
 
 https://user-images.githubusercontent.com/105387636/181641722-278393f1-46c2-4450-8388-562f084a261b.mov
 
-If you liked this repo, make sure to follow me on [Twitter](https://twitter.com/RembertDesigns) where I post daily about Tech related things!
+If you liked this repo, make sure to follow me on [Twitter]([https://twitter.com/RembertDesigns](https://twitter.com/RichardDRembert)) where I post daily about tech-related things!
 
 ### 🌎 Let's Connect
 
