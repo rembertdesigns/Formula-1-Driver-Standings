@@ -59,128 +59,176 @@ const emptyState = () => {
   setTimeout(() => newText.remove(), 500);
 }
 
-// Historical data for completed seasons
-const getHistoricalData = (year) => {
-  const historicalData = {
-    2024: {
-      standings: [
-        { full_name: "Max Verstappen", team_name: "Red Bull Racing Honda RBPT", points: 575, wins: 9, position: 1 },
-        { full_name: "Lando Norris", team_name: "McLaren Mercedes", points: 374, wins: 3, position: 2 },
-        { full_name: "Charles Leclerc", team_name: "Ferrari", points: 356, wins: 2, position: 3 },
-        { full_name: "Oscar Piastri", team_name: "McLaren Mercedes", points: 292, wins: 2, position: 4 },
-        { full_name: "Carlos Sainz", team_name: "Ferrari", points: 290, wins: 1, position: 5 },
-        { full_name: "George Russell", team_name: "Mercedes", points: 245, wins: 1, position: 6 },
-        { full_name: "Lewis Hamilton", team_name: "Mercedes", points: 223, wins: 2, position: 7 },
-        { full_name: "Sergio Perez", team_name: "Red Bull Racing Honda RBPT", points: 152, wins: 0, position: 8 },
-        { full_name: "Fernando Alonso", team_name: "Aston Martin Aramco Mercedes", points: 70, wins: 0, position: 9 },
-        { full_name: "Nico Hulkenberg", team_name: "Haas Ferrari", points: 41, wins: 0, position: 10 }
-      ],
-      year: 2024,
-      isCurrentSeason: false
-    },
-    2023: {
-      standings: [
-        { full_name: "Max Verstappen", team_name: "Red Bull Racing Honda RBPT", points: 575, wins: 19, position: 1 },
-        { full_name: "Sergio Perez", team_name: "Red Bull Racing Honda RBPT", points: 285, wins: 2, position: 2 },
-        { full_name: "Lewis Hamilton", team_name: "Mercedes", points: 234, wins: 1, position: 3 },
-        { full_name: "Fernando Alonso", team_name: "Aston Martin Aramco Mercedes", points: 206, wins: 0, position: 4 },
-        { full_name: "Charles Leclerc", team_name: "Ferrari", points: 206, wins: 0, position: 5 },
-        { full_name: "Lando Norris", team_name: "McLaren Mercedes", points: 205, wins: 0, position: 6 },
-        { full_name: "Carlos Sainz", team_name: "Ferrari", points: 200, wins: 1, position: 7 },
-        { full_name: "George Russell", team_name: "Mercedes", points: 175, wins: 0, position: 8 },
-        { full_name: "Oscar Piastri", team_name: "McLaren Mercedes", points: 97, wins: 0, position: 9 },
-        { full_name: "Lance Stroll", team_name: "Aston Martin Aramco Mercedes", points: 74, wins: 0, position: 10 }
-      ],
-      year: 2023,
-      isCurrentSeason: false
+// Calculate championship standings from race results
+const calculateCurrentStandings = (allResults) => {
+  console.log('Calculating current standings from:', allResults.length, 'results');
+  
+  const pointsSystem = [25, 18, 15, 12, 10, 8, 6, 4, 2, 1];
+  const driverPoints = {};
+  const driverWins = {};
+  const driverTeams = {};
+  
+  allResults.forEach(result => {
+    if (!result.driver_number || !result.position) return;
+    
+    const driverId = result.driver_number;
+    const position = parseInt(result.position);
+    const points = position <= 10 ? pointsSystem[position - 1] : 0;
+    
+    if (!driverPoints[driverId]) {
+      driverPoints[driverId] = 0;
+      driverWins[driverId] = 0;
+      driverTeams[driverId] = result.team_name || 'Unknown Team';
     }
-  };
+    
+    driverPoints[driverId] += points;
+    if (position === 1) {
+      driverWins[driverId]++;
+    }
+  });
   
-  return historicalData[year] || null;
+  const standings = Object.keys(driverPoints).map(driverId => {
+    const sampleResult = allResults.find(r => r.driver_number == driverId);
+    return {
+      position: 0,
+      driver_number: driverId,
+      full_name: sampleResult?.full_name || `Driver ${driverId}`,
+      team_name: driverTeams[driverId],
+      points: driverPoints[driverId],
+      wins: driverWins[driverId]
+    };
+  }).sort((a, b) => {
+    if (b.points !== a.points) return b.points - a.points;
+    return b.wins - a.wins;
+  });
+  
+  standings.forEach((driver, index) => {
+    driver.position = index + 1;
+  });
+  
+  console.log('Calculated standings:', standings);
+  return standings;
 }
 
-// Mock data for current 2025 season
-const getMockStandings = (year) => {
-  console.log('Using mock data for year:', year);
-  
-  const mockDrivers = [
-    { full_name: "Max Verstappen", team_name: "Red Bull Racing Honda RBPT", points: 45, wins: 2 },
-    { full_name: "Lando Norris", team_name: "McLaren Mercedes", points: 32, wins: 0 },
-    { full_name: "Charles Leclerc", team_name: "Ferrari", points: 28, wins: 1 },
-    { full_name: "Oscar Piastri", team_name: "McLaren Mercedes", points: 24, wins: 0 },
-    { full_name: "Carlos Sainz", team_name: "Ferrari", points: 20, wins: 0 },
-    { full_name: "George Russell", team_name: "Mercedes", points: 18, wins: 0 },
-    { full_name: "Lewis Hamilton", team_name: "Mercedes", points: 16, wins: 0 },
-    { full_name: "Sergio Perez", team_name: "Red Bull Racing Honda RBPT", points: 12, wins: 0 },
-    { full_name: "Fernando Alonso", team_name: "Aston Martin Aramco Mercedes", points: 8, wins: 0 },
-    { full_name: "Lance Stroll", team_name: "Aston Martin Aramco Mercedes", points: 6, wins: 0 }
-  ];
-  
-  return {
-    standings: mockDrivers.map((driver, index) => ({
-      ...driver,
-      position: index + 1,
-      driver_number: index + 1
-    })),
-    year: year === 'current' ? new Date().getFullYear() : year,
-    isCurrentSeason: year === 'current'
-  };
-}
+// Real historical F1 data (since Ergast API has CORS issues)
+const historicalData = {
+  2024: {
+    standings: [
+      { full_name: "Max Verstappen", team_name: "Red Bull Racing Honda RBPT", points: 575, wins: 9, position: 1 },
+      { full_name: "Lando Norris", team_name: "McLaren Mercedes", points: 374, wins: 3, position: 2 },
+      { full_name: "Charles Leclerc", team_name: "Ferrari", points: 356, wins: 2, position: 3 },
+      { full_name: "Oscar Piastri", team_name: "McLaren Mercedes", points: 292, wins: 2, position: 4 },
+      { full_name: "Carlos Sainz", team_name: "Ferrari", points: 290, wins: 1, position: 5 },
+      { full_name: "George Russell", team_name: "Mercedes", points: 245, wins: 1, position: 6 },
+      { full_name: "Lewis Hamilton", team_name: "Mercedes", points: 223, wins: 2, position: 7 },
+      { full_name: "Sergio Perez", team_name: "Red Bull Racing Honda RBPT", points: 152, wins: 0, position: 8 },
+      { full_name: "Fernando Alonso", team_name: "Aston Martin Aramco Mercedes", points: 70, wins: 0, position: 9 },
+      { full_name: "Nico Hulkenberg", team_name: "Haas Ferrari", points: 41, wins: 0, position: 10 }
+    ]
+  },
+  2023: {
+    standings: [
+      { full_name: "Max Verstappen", team_name: "Red Bull Racing Honda RBPT", points: 575, wins: 19, position: 1 },
+      { full_name: "Sergio Perez", team_name: "Red Bull Racing Honda RBPT", points: 285, wins: 2, position: 2 },
+      { full_name: "Lewis Hamilton", team_name: "Mercedes", points: 234, wins: 1, position: 3 },
+      { full_name: "Fernando Alonso", team_name: "Aston Martin Aramco Mercedes", points: 206, wins: 0, position: 4 },
+      { full_name: "Charles Leclerc", team_name: "Ferrari", points: 206, wins: 0, position: 5 },
+      { full_name: "Lando Norris", team_name: "McLaren Mercedes", points: 205, wins: 0, position: 6 },
+      { full_name: "Carlos Sainz", team_name: "Ferrari", points: 200, wins: 1, position: 7 },
+      { full_name: "George Russell", team_name: "Mercedes", points: 175, wins: 0, position: 8 },
+      { full_name: "Oscar Piastri", team_name: "McLaren Mercedes", points: 97, wins: 0, position: 9 },
+      { full_name: "Lance Stroll", team_name: "Aston Martin Aramco Mercedes", points: 74, wins: 0, position: 10 }
+    ]
+  },
+  2022: {
+    standings: [
+      { full_name: "Max Verstappen", team_name: "Red Bull Racing Honda RBPT", points: 454, wins: 15, position: 1 },
+      { full_name: "Charles Leclerc", team_name: "Ferrari", points: 308, wins: 3, position: 2 },
+      { full_name: "Sergio Perez", team_name: "Red Bull Racing Honda RBPT", points: 305, wins: 1, position: 3 },
+      { full_name: "George Russell", team_name: "Mercedes", points: 275, wins: 1, position: 4 },
+      { full_name: "Carlos Sainz", team_name: "Ferrari", points: 246, wins: 1, position: 5 },
+      { full_name: "Lewis Hamilton", team_name: "Mercedes", points: 240, wins: 0, position: 6 },
+      { full_name: "Lando Norris", team_name: "McLaren Mercedes", points: 122, wins: 0, position: 7 },
+      { full_name: "Esteban Ocon", team_name: "Alpine Renault", points: 92, wins: 0, position: 8 },
+      { full_name: "Fernando Alonso", team_name: "Alpine Renault", points: 81, wins: 0, position: 9 },
+      { full_name: "Valtteri Bottas", team_name: "Alfa Romeo Ferrari", points: 49, wins: 0, position: 10 }
+    ]
+  },
+  2021: {
+    standings: [
+      { full_name: "Max Verstappen", team_name: "Red Bull Racing Honda", points: 395, wins: 10, position: 1 },
+      { full_name: "Lewis Hamilton", team_name: "Mercedes", points: 387, wins: 8, position: 2 },
+      { full_name: "Valtteri Bottas", team_name: "Mercedes", points: 226, wins: 1, position: 3 },
+      { full_name: "Sergio Perez", team_name: "Red Bull Racing Honda", points: 190, wins: 1, position: 4 },
+      { full_name: "Carlos Sainz", team_name: "Ferrari", points: 164, wins: 0, position: 5 },
+      { full_name: "Lando Norris", team_name: "McLaren Mercedes", points: 160, wins: 0, position: 6 },
+      { full_name: "Charles Leclerc", team_name: "Ferrari", points: 159, wins: 0, position: 7 },
+      { full_name: "Daniel Ricciardo", team_name: "McLaren Mercedes", points: 115, wins: 1, position: 8 },
+      { full_name: "Pierre Gasly", team_name: "AlphaTauri Honda", points: 110, wins: 0, position: 9 },
+      { full_name: "Fernando Alonso", team_name: "Alpine Renault", points: 81, wins: 0, position: 10 }
+    ]
+  },
+  2020: {
+    standings: [
+      { full_name: "Lewis Hamilton", team_name: "Mercedes", points: 347, wins: 11, position: 1 },
+      { full_name: "Valtteri Bottas", team_name: "Mercedes", points: 223, wins: 2, position: 2 },
+      { full_name: "Max Verstappen", team_name: "Red Bull Racing Honda", points: 214, wins: 2, position: 3 },
+      { full_name: "Sergio Perez", team_name: "Racing Point BWT Mercedes", points: 125, wins: 1, position: 4 },
+      { full_name: "Daniel Ricciardo", team_name: "Renault", points: 119, wins: 0, position: 5 },
+      { full_name: "Carlos Sainz", team_name: "McLaren Renault", points: 105, wins: 0, position: 6 },
+      { full_name: "Alexander Albon", team_name: "Red Bull Racing Honda", points: 105, wins: 0, position: 7 },
+      { full_name: "Charles Leclerc", team_name: "Ferrari", points: 98, wins: 0, position: 8 },
+      { full_name: "Lando Norris", team_name: "McLaren Renault", points: 97, wins: 0, position: 9 },
+      { full_name: "Pierre Gasly", team_name: "AlphaTauri Honda", points: 75, wins: 1, position: 10 }
+    ]
+  }
+};
 
-// Enhanced API function with historical data support
+// Get driver standings with real historical data
 const getDriverStandings = async (year) => {
-  const isCurrentSeason = year === 'current' || year === new Date().getFullYear();
-  const targetYear = isCurrentSeason ? new Date().getFullYear() : year;
+  const isCurrentSeason = year === 'current';
+  const targetYear = isCurrentSeason ? new Date().getFullYear() : parseInt(year);
   
-  console.log(`Fetching data for year: ${targetYear}, isCurrentSeason: ${isCurrentSeason}`);
+  console.log(`Getting data for year: ${targetYear}, isCurrentSeason: ${isCurrentSeason}`);
   
-  // For current season (2025), use mock data
-  if (isCurrentSeason && targetYear >= 2025) {
+  // For 2025, use mock data since season is incomplete
+  if (targetYear >= 2025) {
     console.log('Using mock data for 2025 season');
-    return getMockStandings(year);
+    return {
+      standings: [
+        { full_name: "Max Verstappen", team_name: "Red Bull Racing Honda RBPT", points: 45, wins: 2, position: 1 },
+        { full_name: "Lando Norris", team_name: "McLaren Mercedes", points: 32, wins: 0, position: 2 },
+        { full_name: "Charles Leclerc", team_name: "Ferrari", points: 28, wins: 1, position: 3 },
+        { full_name: "Oscar Piastri", team_name: "McLaren Mercedes", points: 24, wins: 0, position: 4 },
+        { full_name: "Carlos Sainz", team_name: "Ferrari", points: 20, wins: 0, position: 5 },
+        { full_name: "George Russell", team_name: "Mercedes", points: 18, wins: 0, position: 6 },
+        { full_name: "Lewis Hamilton", team_name: "Mercedes", points: 16, wins: 0, position: 7 },
+        { full_name: "Sergio Perez", team_name: "Red Bull Racing Honda RBPT", points: 12, wins: 0, position: 8 },
+        { full_name: "Fernando Alonso", team_name: "Aston Martin Aramco Mercedes", points: 8, wins: 0, position: 9 },
+        { full_name: "Lance Stroll", team_name: "Aston Martin Aramco Mercedes", points: 6, wins: 0, position: 10 }
+      ],
+      year: targetYear,
+      isCurrentSeason: true
+    };
   }
   
-  // For historical seasons, use stored data
-  if (targetYear === 2024 || targetYear === 2023) {
+  // For historical years, use stored data
+  if (historicalData[targetYear]) {
     console.log(`Using historical data for ${targetYear}`);
-    const historicalData = getHistoricalData(targetYear);
-    if (historicalData) {
-      return historicalData;
-    }
+    return {
+      standings: historicalData[targetYear].standings,
+      year: targetYear,
+      isCurrentSeason: false
+    };
   }
   
-  try {
-    // Try OpenF1 API for other years
-    const sessionsUrl = `https://api.openf1.org/v1/sessions?year=${targetYear}&session_type=Race`;
-    console.log('Fetching sessions from:', sessionsUrl);
-    
-    const sessionsResponse = await fetch(sessionsUrl);
-    const sessions = await sessionsResponse.json();
-    
-    console.log('Sessions response:', sessions);
-    
-    if (!sessions.length) {
-      console.log('No sessions found, using fallback data');
-      return getMockStandings(year);
-    }
-    
-    // Rest of OpenF1 API logic...
-    const latestSession = sessions
-      .filter(session => new Date(session.date_start) <= new Date())
-      .sort((a, b) => new Date(b.date_start) - new Date(a.date_start))[0];
-    
-    if (!latestSession) {
-      console.log('No completed races found, using fallback data');
-      return getMockStandings(year);
-    }
-    
-    // For now, return mock data even for API calls
-    return getMockStandings(year);
-    
-  } catch (error) {
-    console.error('Error fetching driver standings:', error);
-    return getMockStandings(year);
-  }
+  // Fallback for years we don't have data for
+  return {
+    standings: [],
+    year: targetYear,
+    isCurrentSeason: false,
+    error: `No data available for ${targetYear} season`
+  };
 }
 
 // Render standings
@@ -190,7 +238,7 @@ const renderList = async (year) => {
   
   try {
     const data = await getDriverStandings(year);
-    const { standings, year: dataYear, isCurrentSeason } = data;
+    const { standings, year: dataYear, isCurrentSeason, error } = data;
     
     console.log('Rendering data:', data);
     
@@ -224,10 +272,18 @@ const renderList = async (year) => {
     append(wrapper, title);
     append(wrapper, table);
     
+    // Handle error case
+    if (error) {
+      const errorRow = createNode('tr');
+      errorRow.innerHTML = `<td colspan="4" style="text-align: center; padding: 20px; color: var(--red);">${error}</td>`;
+      table.querySelector('tbody').appendChild(errorRow);
+      return;
+    }
+    
     if (!standings || standings.length === 0) {
       console.error('No standings data to display');
       const errorRow = createNode('tr');
-      errorRow.innerHTML = '<td colspan="4" style="text-align: center; padding: 20px;">No driver data available</td>';
+      errorRow.innerHTML = '<td colspan="4" style="text-align: center; padding: 20px;">No driver data available for this year</td>';
       table.querySelector('tbody').appendChild(errorRow);
       return;
     }
@@ -257,6 +313,7 @@ const renderList = async (year) => {
       if (driver.position == 1) {
         placeElement.classList.add('c-place--first');
         
+        // Show winner card for completed seasons
         if (!isCurrentSeason) {
           const firstPlaceCard = createNode('div');
           firstPlaceCard.classList = 'c-winner';
@@ -320,13 +377,8 @@ const createSeasonSelect = () => {
   newSelect.style.position = 'relative';
   newSelect.style.zIndex = 300;
   
-  const currentYear = new Date().getFullYear();
-  
-  // Add years from 2023 to current year
-  const availableYears = [];
-  for(let i = 0; i <= currentYear - 2023; i++) {
-    availableYears.push(currentYear - i);
-  }
+  // Available years with real data
+  const availableYears = [2025, 2024, 2023, 2022, 2021, 2020];
   
   availableYears.forEach((itemYear, index) => {
     let newOption = createNode('option');
