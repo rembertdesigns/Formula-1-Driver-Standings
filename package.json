@@ -1,0 +1,22 @@
+{
+  "name": "formula-1-driver-standings",
+  "version": "1.0.0",
+  "description": "Interactive F1 Driver Standings Application",
+  "main": "index.html",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "start": "vite"
+  },
+  "keywords": ["formula1", "f1", "standings", "racing"],
+  "author": "Your Name",
+  "license": "MIT",
+  "devDependencies": {
+    "vite": "^5.0.0",
+    "sass": "^1.69.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
