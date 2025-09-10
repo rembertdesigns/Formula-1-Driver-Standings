@@ -59,58 +59,7 @@ const emptyState = () => {
   setTimeout(() => newText.remove(), 500);
 }
 
-// Calculate championship standings from race results
-const calculateCurrentStandings = (allResults) => {
-  console.log('Calculating current standings from:', allResults.length, 'results');
-  
-  const pointsSystem = [25, 18, 15, 12, 10, 8, 6, 4, 2, 1];
-  const driverPoints = {};
-  const driverWins = {};
-  const driverTeams = {};
-  
-  allResults.forEach(result => {
-    if (!result.driver_number || !result.position) return;
-    
-    const driverId = result.driver_number;
-    const position = parseInt(result.position);
-    const points = position <= 10 ? pointsSystem[position - 1] : 0;
-    
-    if (!driverPoints[driverId]) {
-      driverPoints[driverId] = 0;
-      driverWins[driverId] = 0;
-      driverTeams[driverId] = result.team_name || 'Unknown Team';
-    }
-    
-    driverPoints[driverId] += points;
-    if (position === 1) {
-      driverWins[driverId]++;
-    }
-  });
-  
-  const standings = Object.keys(driverPoints).map(driverId => {
-    const sampleResult = allResults.find(r => r.driver_number == driverId);
-    return {
-      position: 0,
-      driver_number: driverId,
-      full_name: sampleResult?.full_name || `Driver ${driverId}`,
-      team_name: driverTeams[driverId],
-      points: driverPoints[driverId],
-      wins: driverWins[driverId]
-    };
-  }).sort((a, b) => {
-    if (b.points !== a.points) return b.points - a.points;
-    return b.wins - a.wins;
-  });
-  
-  standings.forEach((driver, index) => {
-    driver.position = index + 1;
-  });
-  
-  console.log('Calculated standings:', standings);
-  return standings;
-}
-
-// Real historical F1 data (since Ergast API has CORS issues)
+// Real historical F1 data
 const historicalData = {
   2024: {
     standings: [
@@ -180,6 +129,146 @@ const historicalData = {
       { full_name: "Charles Leclerc", team_name: "Ferrari", points: 98, wins: 0, position: 8 },
       { full_name: "Lando Norris", team_name: "McLaren Renault", points: 97, wins: 0, position: 9 },
       { full_name: "Pierre Gasly", team_name: "AlphaTauri Honda", points: 75, wins: 1, position: 10 }
+    ]
+  },
+  2019: {
+    standings: [
+      { full_name: "Lewis Hamilton", team_name: "Mercedes", points: 413, wins: 11, position: 1 },
+      { full_name: "Valtteri Bottas", team_name: "Mercedes", points: 326, wins: 4, position: 2 },
+      { full_name: "Max Verstappen", team_name: "Red Bull Racing Honda", points: 278, wins: 3, position: 3 },
+      { full_name: "Charles Leclerc", team_name: "Ferrari", points: 264, wins: 2, position: 4 },
+      { full_name: "Sebastian Vettel", team_name: "Ferrari", points: 240, wins: 1, position: 5 },
+      { full_name: "Carlos Sainz", team_name: "McLaren Renault", points: 96, wins: 0, position: 6 },
+      { full_name: "Pierre Gasly", team_name: "Toro Rosso Honda", points: 95, wins: 0, position: 7 },
+      { full_name: "Alexander Albon", team_name: "Red Bull Racing Honda", points: 92, wins: 0, position: 8 },
+      { full_name: "Daniel Ricciardo", team_name: "Renault", points: 54, wins: 0, position: 9 },
+      { full_name: "Sergio Perez", team_name: "Racing Point BWT Mercedes", points: 52, wins: 0, position: 10 }
+    ]
+  },
+  2018: {
+    standings: [
+      { full_name: "Lewis Hamilton", team_name: "Mercedes", points: 408, wins: 11, position: 1 },
+      { full_name: "Sebastian Vettel", team_name: "Ferrari", points: 320, wins: 5, position: 2 },
+      { full_name: "Kimi Raikkonen", team_name: "Ferrari", points: 251, wins: 1, position: 3 },
+      { full_name: "Max Verstappen", team_name: "Red Bull Racing TAG Heuer", points: 249, wins: 2, position: 4 },
+      { full_name: "Valtteri Bottas", team_name: "Mercedes", points: 247, wins: 0, position: 5 },
+      { full_name: "Daniel Ricciardo", team_name: "Red Bull Racing TAG Heuer", points: 170, wins: 2, position: 6 },
+      { full_name: "Nico Hulkenberg", team_name: "Renault", points: 69, wins: 0, position: 7 },
+      { full_name: "Fernando Alonso", team_name: "McLaren Renault", points: 50, wins: 0, position: 8 },
+      { full_name: "Kevin Magnussen", team_name: "Haas Ferrari", points: 56, wins: 0, position: 9 },
+      { full_name: "Carlos Sainz", team_name: "Renault", points: 53, wins: 0, position: 10 }
+    ]
+  },
+  2017: {
+    standings: [
+      { full_name: "Lewis Hamilton", team_name: "Mercedes", points: 363, wins: 9, position: 1 },
+      { full_name: "Sebastian Vettel", team_name: "Ferrari", points: 317, wins: 5, position: 2 },
+      { full_name: "Valtteri Bottas", team_name: "Mercedes", points: 305, wins: 3, position: 3 },
+      { full_name: "Kimi Raikkonen", team_name: "Ferrari", points: 205, wins: 0, position: 4 },
+      { full_name: "Daniel Ricciardo", team_name: "Red Bull Racing TAG Heuer", points: 200, wins: 1, position: 5 },
+      { full_name: "Max Verstappen", team_name: "Red Bull Racing TAG Heuer", points: 168, wins: 2, position: 6 },
+      { full_name: "Sergio Perez", team_name: "Force India Mercedes", points: 100, wins: 0, position: 7 },
+      { full_name: "Esteban Ocon", team_name: "Force India Mercedes", points: 87, wins: 0, position: 8 },
+      { full_name: "Carlos Sainz", team_name: "Toro Rosso", points: 54, wins: 0, position: 9 },
+      { full_name: "Nico Hulkenberg", team_name: "Renault", points: 43, wins: 0, position: 10 }
+    ]
+  },
+  2016: {
+    standings: [
+      { full_name: "Nico Rosberg", team_name: "Mercedes", points: 385, wins: 9, position: 1 },
+      { full_name: "Lewis Hamilton", team_name: "Mercedes", points: 380, wins: 10, position: 2 },
+      { full_name: "Daniel Ricciardo", team_name: "Red Bull Racing TAG Heuer", points: 256, wins: 1, position: 3 },
+      { full_name: "Sebastian Vettel", team_name: "Ferrari", points: 212, wins: 0, position: 4 },
+      { full_name: "Max Verstappen", team_name: "Red Bull Racing TAG Heuer", points: 204, wins: 1, position: 5 },
+      { full_name: "Kimi Raikkonen", team_name: "Ferrari", points: 186, wins: 0, position: 6 },
+      { full_name: "Sergio Perez", team_name: "Force India Mercedes", points: 101, wins: 0, position: 7 },
+      { full_name: "Valtteri Bottas", team_name: "Williams Mercedes", points: 85, wins: 0, position: 8 },
+      { full_name: "Nico Hulkenberg", team_name: "Force India Mercedes", points: 72, wins: 0, position: 9 },
+      { full_name: "Fernando Alonso", team_name: "McLaren Honda", points: 54, wins: 0, position: 10 }
+    ]
+  },
+  2015: {
+    standings: [
+      { full_name: "Lewis Hamilton", team_name: "Mercedes", points: 381, wins: 10, position: 1 },
+      { full_name: "Nico Rosberg", team_name: "Mercedes", points: 322, wins: 6, position: 2 },
+      { full_name: "Sebastian Vettel", team_name: "Ferrari", points: 278, wins: 3, position: 3 },
+      { full_name: "Kimi Raikkonen", team_name: "Ferrari", points: 150, wins: 0, position: 4 },
+      { full_name: "Valtteri Bottas", team_name: "Williams Mercedes", points: 136, wins: 0, position: 5 },
+      { full_name: "Felipe Massa", team_name: "Williams Mercedes", points: 121, wins: 0, position: 6 },
+      { full_name: "Daniel Ricciardo", team_name: "Red Bull Racing Renault", points: 92, wins: 0, position: 7 },
+      { full_name: "Daniil Kvyat", team_name: "Red Bull Racing Renault", points: 95, wins: 0, position: 8 },
+      { full_name: "Sergio Perez", team_name: "Force India Mercedes", points: 78, wins: 0, position: 9 },
+      { full_name: "Carlos Sainz", team_name: "Toro Rosso Renault", points: 18, wins: 0, position: 10 }
+    ]
+  },
+  2014: {
+    standings: [
+      { full_name: "Lewis Hamilton", team_name: "Mercedes", points: 384, wins: 11, position: 1 },
+      { full_name: "Nico Rosberg", team_name: "Mercedes", points: 317, wins: 5, position: 2 },
+      { full_name: "Daniel Ricciardo", team_name: "Red Bull Racing Renault", points: 238, wins: 3, position: 3 },
+      { full_name: "Valtteri Bottas", team_name: "Williams Mercedes", points: 186, wins: 0, position: 4 },
+      { full_name: "Sebastian Vettel", team_name: "Red Bull Racing Renault", points: 167, wins: 0, position: 5 },
+      { full_name: "Fernando Alonso", team_name: "Ferrari", points: 161, wins: 0, position: 6 },
+      { full_name: "Felipe Massa", team_name: "Williams Mercedes", points: 134, wins: 0, position: 7 },
+      { full_name: "Jenson Button", team_name: "McLaren Mercedes", points: 126, wins: 0, position: 8 },
+      { full_name: "Nico Hulkenberg", team_name: "Force India Mercedes", points: 96, wins: 0, position: 9 },
+      { full_name: "Sergio Perez", team_name: "Force India Mercedes", points: 59, wins: 0, position: 10 }
+    ]
+  },
+  2013: {
+    standings: [
+      { full_name: "Sebastian Vettel", team_name: "Red Bull Racing Renault", points: 397, wins: 13, position: 1 },
+      { full_name: "Fernando Alonso", team_name: "Ferrari", points: 242, wins: 2, position: 2 },
+      { full_name: "Mark Webber", team_name: "Red Bull Racing Renault", points: 199, wins: 0, position: 3 },
+      { full_name: "Lewis Hamilton", team_name: "Mercedes", points: 189, wins: 1, position: 4 },
+      { full_name: "Kimi Raikkonen", team_name: "Lotus Renault", points: 183, wins: 1, position: 5 },
+      { full_name: "Nico Rosberg", team_name: "Mercedes", points: 171, wins: 2, position: 6 },
+      { full_name: "Felipe Massa", team_name: "Ferrari", points: 112, wins: 0, position: 7 },
+      { full_name: "Romain Grosjean", team_name: "Lotus Renault", points: 132, wins: 0, position: 8 },
+      { full_name: "Jenson Button", team_name: "McLaren Mercedes", points: 73, wins: 0, position: 9 },
+      { full_name: "Sergio Perez", team_name: "McLaren Mercedes", points: 49, wins: 0, position: 10 }
+    ]
+  },
+  2012: {
+    standings: [
+      { full_name: "Sebastian Vettel", team_name: "Red Bull Racing Renault", points: 281, wins: 5, position: 1 },
+      { full_name: "Fernando Alonso", team_name: "Ferrari", points: 278, wins: 3, position: 2 },
+      { full_name: "Kimi Raikkonen", team_name: "Lotus Renault", points: 207, wins: 1, position: 3 },
+      { full_name: "Lewis Hamilton", team_name: "McLaren Mercedes", points: 190, wins: 4, position: 4 },
+      { full_name: "Jenson Button", team_name: "McLaren Mercedes", points: 188, wins: 3, position: 5 },
+      { full_name: "Mark Webber", team_name: "Red Bull Racing Renault", points: 179, wins: 2, position: 6 },
+      { full_name: "Felipe Massa", team_name: "Ferrari", points: 122, wins: 0, position: 7 },
+      { full_name: "Romain Grosjean", team_name: "Lotus Renault", points: 96, wins: 0, position: 8 },
+      { full_name: "Nico Rosberg", team_name: "Mercedes", points: 93, wins: 1, position: 9 },
+      { full_name: "Sergio Perez", team_name: "Sauber Ferrari", points: 66, wins: 0, position: 10 }
+    ]
+  },
+  2011: {
+    standings: [
+      { full_name: "Sebastian Vettel", team_name: "Red Bull Racing Renault", points: 392, wins: 11, position: 1 },
+      { full_name: "Jenson Button", team_name: "McLaren Mercedes", points: 270, wins: 3, position: 2 },
+      { full_name: "Mark Webber", team_name: "Red Bull Racing Renault", points: 258, wins: 1, position: 3 },
+      { full_name: "Fernando Alonso", team_name: "Ferrari", points: 257, wins: 1, position: 4 },
+      { full_name: "Lewis Hamilton", team_name: "McLaren Mercedes", points: 227, wins: 3, position: 5 },
+      { full_name: "Felipe Massa", team_name: "Ferrari", points: 118, wins: 0, position: 6 },
+      { full_name: "Nico Rosberg", team_name: "Mercedes", points: 89, wins: 0, position: 7 },
+      { full_name: "Michael Schumacher", team_name: "Mercedes", points: 76, wins: 0, position: 8 },
+      { full_name: "Bruno Senna", team_name: "Renault", points: 44, wins: 0, position: 9 },
+      { full_name: "Kamui Kobayashi", team_name: "Sauber Ferrari", points: 30, wins: 0, position: 10 }
+    ]
+  },
+  2010: {
+    standings: [
+      { full_name: "Sebastian Vettel", team_name: "Red Bull Racing Renault", points: 256, wins: 5, position: 1 },
+      { full_name: "Fernando Alonso", team_name: "Ferrari", points: 252, wins: 5, position: 2 },
+      { full_name: "Mark Webber", team_name: "Red Bull Racing Renault", points: 242, wins: 4, position: 3 },
+      { full_name: "Lewis Hamilton", team_name: "McLaren Mercedes", points: 240, wins: 3, position: 4 },
+      { full_name: "Jenson Button", team_name: "McLaren Mercedes", points: 214, wins: 2, position: 5 },
+      { full_name: "Felipe Massa", team_name: "Ferrari", points: 144, wins: 0, position: 6 },
+      { full_name: "Nico Rosberg", team_name: "Mercedes", points: 142, wins: 0, position: 7 },
+      { full_name: "Robert Kubica", team_name: "Renault", points: 136, wins: 0, position: 8 },
+      { full_name: "Michael Schumacher", team_name: "Mercedes", points: 72, wins: 0, position: 9 },
+      { full_name: "Rubens Barrichello", team_name: "Williams Cosworth", points: 47, wins: 0, position: 10 }
     ]
   }
 };
@@ -378,7 +467,7 @@ const createSeasonSelect = () => {
   newSelect.style.zIndex = 300;
   
   // Available years with real data
-  const availableYears = [2025, 2024, 2023, 2022, 2021, 2020];
+  const availableYears = [2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011, 2010];
   
   availableYears.forEach((itemYear, index) => {
     let newOption = createNode('option');
