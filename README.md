@@ -37,3 +37,10 @@ npm install
 # 4. Start the development server
 npm run dev
 ```
+**💡 Note**: Make sure you have Node.js (>=16.0.0) and npm installed before starting.
+
+### Available Scripts
+```bash
+npm run dev      # Start development server (port 3000)
+npm run build    # Build for production
+npm run preview  # Preview production build
