@@ -24,3 +24,16 @@ https://user-images.githubusercontent.com/105387636/181641722-278393f1-46c2-4450
 
 ## 🧰 Installation & Setup
 To run this project locally:
+```bash
+# 1. Clone the repository
+git clone https://github.com/rembertdesigns/Formula-1-Driver-Standings.git
+
+# 2. Navigate into the project directory
+cd Formula-1-Driver-Standings
+
+# 3. Install dependencies
+npm install
+
+# 4. Start the development server
+npm run dev
+```
